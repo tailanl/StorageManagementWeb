@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.ProductionMapper">
+
+    <select id="GetAllProduction" resultType="com.example.demo.entity.production">
+        select * from production;
+    </select>
+    <select id="GetProductionById" resultType="com.example.demo.entity.production">
+        select * from production where productionid = #{id}
+    </select>
+    <select id="GetProductionByState" resultType="com.example.demo.entity.production">
+        select * from production where state = #{state}
+    </select>
+    <select id="GetMaxProductionId" resultType="Integer">
+        select max(productionid) pid from production
+    </select>
+
+    <insert id="AddProduction"  parameterType="com.example.demo.entity.production">
+        insert into production(costItem,costNum,productionItem,productionNum,state) values(#{costid},#{costnum},#{product},#{productnum},#{state});
+    </insert>
+    <insert id="AddProductionWithId"  parameterType="com.example.demo.entity.production">
+        insert into production(producitonid,costItem,costNum,productionItem,productionNum,state) values(#{producitonid},#{costid},#{costnum},#{product},#{productnum},#{state});
+    </insert>
+    <update id="updateProductionState" parameterType="com.example.demo.entity.production">
+        UPDATE production
+        SET
+        state = #{state}
+        WHERE productionid = #{producitonid}
+    </update>
+    <update id="updateProductionNum" parameterType="com.example.demo.entity.production">
+        UPDATE production
+        SET
+        costNum = #{costnum},
+        productionNum = #{productnum}
+        WHERE productionid = #{producitonid}
+    </update>
+</mapper>

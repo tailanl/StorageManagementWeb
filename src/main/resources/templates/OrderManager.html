@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单管理系统</title>
+    <style>
+        /* 导航栏样式（保持原有风格） */
+        nav {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: #3498db;
+        }
+
+        /* 主内容区 */
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 查询条件区域 */
+        .filter-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* 订单表格 */
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .order-table th,
+        .order-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .order-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* 操作按钮 */
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: #f1c40f;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            width: 500px;
+            padding: 20px;
+            border-radius: 8px;
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close {
+            cursor: pointer;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+<!-- 导航栏 -->
+<nav>
+    <ul>
+        <li><a href="#" class="active">订单管理</a></li>
+        <li><a href="#customer">客户管理</a></li>
+        <li><a href="#report">统计报表</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+    <!-- 查询条件 -->
+    <div class="filter-section">
+        <div class="filter-group">
+            <label>客户名称</label>
+            <input type="text" id="customerFilter">
+        </div>
+        <div class="filter-group">
+            <label>订单状态</label>
+            <select id="statusFilter">
+                <option value="">全部</option>
+                <option value="pending">进行中</option>
+                <option value="completed">已完成</option>
+                <option value="cancelled">已取消</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>开始日期</label>
+            <input type="date" id="startDate">
+        </div>
+        <div class="filter-group">
+            <label>结束日期</label>
+            <input type="date" id="endDate">
+        </div>
+        <button class="btn btn-primary" onclick="loadOrders()">查询</button>
+        <button class="btn btn-success" onclick="showAddModal()">新增订单</button>
+    </div>
+
+    <!-- 订单表格 -->
+    <table class="order-table">
+        <thead>
+        <tr>
+            <th>订单号</th>
+            <th>客户名称</th>
+            <th>产品</th>
+            <th>数量</th>
+            <th>状态</th>
+            <th>订单日期</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="orderBody"></tbody>
+    </table>
+</div>
+
+<!-- 添加/编辑模态框 -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">新增订单</h3>
+            <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <form id="orderForm" onsubmit="saveOrder(event)">
+            <input type="hidden" id="editId">
+            <div class="filter-group">
+                <label>客户名称</label>
+                <input type="text" id="customerName" required>
+            </div>
+            <div class="filter-group">
+                <label>产品名称</label>
+                <input type="text" id="product" required>
+            </div>
+            <div class="filter-group">
+                <label>数量</label>
+                <input type="number" id="quantity" min="1" required>
+            </div>
+            <div class="filter-group">
+                <label>订单日期</label>
+                <input type="date" id="orderDate" required>
+            </div>
+            <div class="filter-group">
+                <label>状态</label>
+                <select id="status">
+                    <option value="pending">进行中</option>
+                    <option value="completed">已完成</option>
+                    <option value="cancelled">已取消</option>
+                </select>
+            </div>
+            <div style="margin-top: 20px; text-align: right">
+                <button type="button" class="btn btn-danger" onclick="closeModal()">取消</button>
+                <button type="submit" class="btn btn-primary">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    async  function GetDateByApi(api,x,y) {
+            let response = await fetch(api);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            let data = await response.json();
+            map = new Map();
+            data.forEach(it => {
+            map.set(it[x],it[y]);
+        });
+            return map
+    }
+    async function GetData(){
+        const API_URL = 'http://localhost:8080/data/order';
+        const Batch_API_URL = 'http://localhost:8080/data/batch/order';
+        let itemData = await GetDateByApi('http://localhost:8080/data/item','itemid','name');
+        let staffData =await GetDateByApi('http://localhost:8080/data/staff','staff','name');
+        let batchTimeData = await GetDateByApi(Batch_API_URL,'id','time');
+        let batchStaffData = await GetDateByApi(Batch_API_URL,'id','staffid');
+        const orderResponse = await fetch(API_URL);
+        orderdata = await orderResponse.json();
+
+        orderdata.forEach(data =>{
+            year = batchTimeData.get(data.orderid)/10000
+            month =batchTimeData.get(data.orderid)%10000
+            month = month/100
+            day = batchTimeData.get(data.orderid)%100
+            d = new Date(year,month,day)
+            const order = {
+                id: data.orderid,
+                customer: staffData.get(batchStaffData.get(data.orderid)),
+                product:  itemData.get(data.itemid),
+                quantity: data.num,
+                status: data.state,
+                date: d.toDateString()
+            };
+            orders.push(order);
+        })
+        console.log(itemData);
+        console.log(staffData);
+        console.log(batchTimeData);
+        console.log(batchStaffData);
+        console.log(orders);
+    }
+    // 模拟数据存储
+    let orders = [];
+
+    // 加载订单列表
+    async function loadOrders() {
+        await GetData();
+        const customerFilter = document.getElementById('customerFilter').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        console.log(startDate)
+        console.log(endDate)
+        console.log(statusFilter)
+        const filtered = orders.filter(order => {
+            const date = new Date(order.date);
+            return (!customerFilter || order.customer.toLowerCase().includes(customerFilter)) &&
+                (!statusFilter || order.status === statusFilter) &&
+                (!startDate || date >= new Date(startDate)) &&
+                (!endDate || date <= new Date(endDate));
+        });
+
+        renderOrders(filtered);
+    }
+    async function ReloadOrders()
+    {
+        const customerFilter = document.getElementById('customerFilter').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const filtered = orders.filter(order => {
+            const date = new Date(order.date);
+            return (!customerFilter || order.customer.toLowerCase().includes(customerFilter)) &&
+                (!statusFilter || order.status === statusFilter) &&
+                (!startDate || date >= new Date(startDate)) &&
+                (!endDate || date <= new Date(endDate));
+        });
+        renderOrders(filtered);
+    }
+    // 渲染订单列表
+    function renderOrders(data) {
+        const tbody = document.getElementById('orderBody');
+        tbody.innerHTML = '';
+
+        data.forEach(order => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.product}</td>
+                    <td>
+                        <input type="number" value="${order.quantity}"
+                               onchange="updateQuantity(${order.id}, this.value)"
+                               style="width: 60px;">
+                    </td>
+                    <td>
+                        <select onchange="updateStatus(${order.id}, this.value)">
+                            <option value="pending" ${order.status === 'wait' ? 'selected' : ''}>进行中</option>
+                            <option value="completed" ${order.status === 'done' ? 'selected' : ''}>已完成</option>
+                            <option value="cancelled" ${order.status === 'wasted' ? 'selected' : ''}>已取消</option>
+                        </select>
+                    </td>
+                    <td>${order.date}</td>
+                    <td>
+                        <button class="btn btn-warning" onclick="editOrder(${order.id})">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteOrder(${order.id})">删除</button>
+                    </td>
+                `;
+            tbody.appendChild(row);
+        });
+    }
+    // 显示添加模态框
+    function showAddModal() {
+        document.getElementById('editModal').style.display = 'block';
+        document.getElementById('modalTitle').textContent = '新增订单';
+        document.getElementById('orderForm').reset();
+        document.getElementById('editId').value = '';
+    }
+
+    // 关闭模态框
+    function closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    // 保存订单
+    function saveOrder(e) {
+        e.preventDefault();
+
+        const order = {
+            id: document.getElementById('editId').value || Date.now(),
+            customer: document.getElementById('customerName').value,
+            product: document.getElementById('product').value,
+            quantity: parseInt(document.getElementById('quantity').value),
+            status: document.getElementById('status').value,
+            date: document.getElementById('orderDate').value
+        };
+
+        if (order.id) {
+            const index = orders.findIndex(o => o.id == order.id);
+            if (index > -1) {
+                orders[index] = order;
+            } else {
+                orders.push(order);
+            }
+        }
+        ReloadOrders();
+        closeModal();
+    }
+
+    // 编辑订单
+    function editOrder(id) {
+        const order = orders.find(o => o.id == id);
+        if (order) {
+            document.getElementById('editId').value = order.id;
+            document.getElementById('customerName').value = order.customer;
+            document.getElementById('product').value = order.product;
+            document.getElementById('quantity').value = order.quantity;
+            document.getElementById('status').value = order.status;
+            document.getElementById('orderDate').value = order.date;
+            document.getElementById('modalTitle').textContent = '编辑订单';
+            document.getElementById('editModal').style.display = 'block';
+        }
+    }
+    // 删除订单
+    function deleteOrder(id) {
+        if (confirm('确定要删除此订单吗？')) {
+            orders = orders.filter(o => o.id != id);
+            ReloadOrders();
+        }
+    }
+    // 更新数量
+    function updateQuantity(id, value) {
+        const order = orders.find(o => o.id == id);
+        if (order) order.quantity = parseInt(value);
+    }
+
+    // 更新状态
+    function updateStatus(id, value) {
+        const order = orders.find(o => o.id == id);
+        if (order) order.status = value;
+    }
+    function exportCSV() {
+        const csvContent = [
+            ['订单号', '客户名称', '产品', '数量', '状态', '订单日期'].join(','),
+            ...orders.map(o => [
+                o.id,
+                o.customer,
+                o.product,
+                o.quantity,
+                o.status,
+                o.date
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'orders.csv';
+        a.click();
+    }
+    // 初始化加载
+    loadOrders();
+</script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>库存管理系统</title>
+    <style>
+        /* 导航栏样式 */
+        nav {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        nav ul li {
+            margin-right: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: #3498db;
+        }
+
+        nav a.active {
+            background-color: #2980b9;
+        }
+
+        /* 内容区域调整 */
+        .container {
+            margin-top: 80px; /* 给导航栏留出空间 */
+            padding: 20px;
+        }
+
+        /* 列表项按钮样式 */
+        .list-item {
+            position: relative;
+            padding-right: 120px; /* 给按钮留出空间 */
+        }
+
+        .item-action {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .detail-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .edit-btn {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        /* 数据表样式 */
+        .data-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .table-title {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        /* 控制按钮 */
+        .control-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav>
+    <ul>
+        <li><a href="#" class="active">首页</a></li>
+        <li><a href="#inventory">库存管理</a></li>
+        <li><a href="#report">报表统计</a></li>
+        <li><a href="#setting">系统设置</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+    <div>
+        <div class="table-header">
+            <h3 class="table-title">生产</h3>
+            <button class="control-btn" onclick="handleProductionAction()">操作</button>
+        </div>
+        <ul class="data-list" id="datalist">
+            <table id="production-table">
+                <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>名称</th>
+                    <th>数量</th>
+                    <th>类型</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </ul>
+    </div>
+    <div>
+        <div class="table-header">
+            <h3 class="table-title">采购记录</h3>
+            <button class="control-btn" onclick="handlePurchaseAction()">操作</button>
+        </div>
+        <ul class="data-list" id="dataList2">
+            <table id="purchase-table">
+                <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>名称</th>
+                    <th>数量</th>
+                    <th>类型</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </ul>
+    </div>
+    <div>
+        <div class="table-header">
+            <h3 class="table-title">销售记录</h3>
+            <button class="control-btn" onclick="handleSaleAction()">操作</button>
+        </div>
+        <ul class="data-list" id="dataList3">
+            <table id="order-table">
+                <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>名称</th>
+                    <th>数量</th>
+                    <th>类型</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(location.search);
+    item = params.get('itemid');
+    const API_URL = 'http://localhost:8080/data/storageChange/'+item.toString();
+    const Staff_API_URL = 'http://localhost:8080/data/staff';
+    // 创建列表项模板
+    function createListItem(date,num,staffname,type) {
+        console.log(date,num,staffname,type);
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        const cell2 = document.createElement('td');
+        const cell3 = document.createElement('td');
+        const cell4 = document.createElement('td');
+        cell.textContent = date;
+        row.appendChild(cell);
+        cell2.textContent = num;
+        row.appendChild(cell2);
+        cell3.textContent = staffname;
+        row.appendChild(cell3);
+        cell4.textContent = type;
+        row.appendChild(cell4);
+        return row;
+    }
+    // 初始化
+    async function init() {
+
+        const response = await fetch(API_URL);
+        const StaffResponse = await fetch(Staff_API_URL);
+        const map1 = new Map();
+
+        if (!response.ok) {
+            throw new Error(`HTTP错误! 状态码: ${response.status}`);
+        }
+        if (!StaffResponse.ok) {
+            throw new Error(`HTTP错误! 状态码: ${StaffResponse.status}`);
+        }
+        const rawData =await response.json();
+        const StaffData =await StaffResponse.json();
+        StaffData.forEach(it => {
+            map1.set(it.staff,it.name);
+        });
+        // 渲染数据
+        const production = document.getElementById('production-table')
+        const purchase = document.getElementById('purchase-table')
+        const order = document.getElementById('order-table')
+        rawData.forEach(item => {
+
+                if(item.type == 'production_cost') {
+                    console.log(item.type)
+                    row = production.insertRow(-1);
+                    row.insertCell(0).innerHTML = item.time;
+                    row.insertCell(1).innerHTML = map1.get(item.staffid);
+                    row.insertCell(2).innerHTML = item.num;
+                    row.insertCell(3).innerHTML = item.type;
+                }
+                if(item.type == 'production_product'){
+                    console.log(item.type)
+                    row = production.insertRow(-1);
+                    row.insertCell(0).innerHTML = item.time;
+                    row.insertCell(1).innerHTML = map1.get(item.staffid);
+                    row.insertCell(2).innerHTML = item.num;
+                    row.insertCell(3).innerHTML = item.type;}
+                 if(item.type=='purchase'){
+                    console.log(item.type)
+                    row = purchase.insertRow(-1);
+                    row.insertCell(0).innerHTML = item.time;
+                    row.insertCell(1).innerHTML = map1.get(item.staffid);
+                    row.insertCell(2).innerHTML = item.num;
+                    row.insertCell(3).innerHTML = item.type;}
+                if(item.type== 'order'){
+                    console.log(item.type)
+                    row = order.insertRow(-1);
+                    row.insertCell(0).innerHTML = item.time;
+                    row.insertCell(1).innerHTML = map1.get(item.staffid);
+                    row.insertCell(2).innerHTML = item.num;
+                    row.insertCell(3).innerHTML = item.type;
+                }
+        });
+    }
+    function handleProductionAction() {
+        console.log('执行生产相关操作');
+        // 这里可以添加具体业务逻辑
+    }
+
+    function handlePurchaseAction() {
+        console.log('执行采购相关操作');
+    }
+
+    function handleSaleAction() {
+        console.log('执行销售相关操作');
+    }
+    // 页面加载初始化
+    window.onload = init;
+</script>
+</body>
+</html>

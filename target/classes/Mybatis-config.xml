@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <setting name="cacheEnabled"             value="true" />  <!-- 全局映射器启用缓存 -->
+        <setting name="useGeneratedKeys"         value="true" />  <!-- 允许 JDBC 支持自动生成主键 -->
+        <setting name="defaultExecutorType"      value="REUSE" /> <!-- 配置默认的执行器 -->
+        <setting name="logImpl"                  value="SLF4J" /> <!-- 指定 MyBatis 所用日志的具体实现 -->
+        <!--		<setting name="mapUnderscoreToCamelCase" value="true"/> &lt;!&ndash; 驼峰式命名 &ndash;&gt;-->
+    </settings>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <!--            这里要写入我们连接mysql数据库的信息-->
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/factory"/>
+                <property name="username" value="root"/>
+                <property name="password" value="123456"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <!--    这里要写sql映射-->
+    <mappers>
+        <mapper resource="mapper/ItemMapper.xml"/>
+        <mapper resource="mapper/StorageMapper.xml"/>
+        <mapper resource="mapper/ProductionMapper.xml"/>
+        <mapper resource="mapper/OrderMapper.xml"/>
+        <mapper resource="mapper/StaffMapper.xml"/>
+        <mapper resource="mapper/BatchMapper.xml"/>
+        <mapper resource="mapper/PurchaseMapper.xml"/>
+    </mappers>
+</configuration>

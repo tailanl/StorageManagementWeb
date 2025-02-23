@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.OrderMapper">
+    <select id="GetAllOrder" resultType="com.example.demo.entity.order">
+        select * from ordertable
+    </select>
+    <select id="GetOrderById" resultType="com.example.demo.entity.order">
+        select * from ordertable where  orderid = #{id}
+    </select>
+    <select id="GetOrderByState" resultType="com.example.demo.entity.order">
+        select * from ordertable where state = #{state}
+    </select>
+    <select id="GetDoneOrder" resultType="com.example.demo.entity.order">
+        select * from ordertable where state = 'done'
+    </select>
+    <select id="GetMaxOrderId" resultType="Integer">
+        select max(orderid) orderid from ordertable
+    </select>
+    <insert id="AddOrderWithId" parameterType="com.example.demo.entity.order">
+        insert into ordertable(orderid,itemid,order_num,price,state) values (#{orderid},#{itemid},#{num},#{price},#{state})
+    </insert>
+    <insert id="AddNewOrder" parameterType="com.example.demo.entity.order">
+        insert into ordertable(itemid,order_num,price,state) values (#{itemid},#{num},#{price},#{state})
+    </insert>
+    <update id="updateOrderState" parameterType="com.example.demo.entity.order">
+        UPDATE ordertable
+        SET
+        state = #{state}
+        WHERE orderid = #{orderid}
+    </update>
+    <update id="updateOrderStateById">
+        UPDATE ordertable
+        SET
+        state = #{state}
+        WHERE orderid = #{id}
+    </update>
+    <update id="updateOrderNum" parameterType="com.example.demo.entity.order">
+        UPDATE ordertable
+        SET
+        order_num = #{num}
+        WHERE orderid = #{orderid}
+    </update>
+</mapper>

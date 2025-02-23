@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.PurchaseMapper">
+
+    <select id="GetAllPurchase" resultType="com.example.demo.entity.purchase">
+        select * from purchase;
+    </select>
+    <select id="GetPurchaseById" resultType="com.example.demo.entity.purchase">
+        select * from purchase where  purchaseid = #{id}
+    </select>
+    <select id="GetPurchaseByState" resultType="com.example.demo.entity.purchase">
+        select * from purchase where state = #{state}
+    </select>
+    <select id="GetDonePurchase" resultType="com.example.demo.entity.purchase">
+        select * from purchase where state = 'done'
+    </select>
+    <select id="GetMaxPurchaseId" resultType="Integer">
+        select max(purchaseid) purchaseid from purchase
+    </select>
+    <insert id="AddPurchaseWithId" parameterType="com.example.demo.entity.purchase">
+        insert into purchase(purchaseid,itemid,purchasenum,price,state) values (#{purchaseid},#{itemid},#{num},#{price},#{state})
+    </insert>
+    <insert id="AddNewPurchase" parameterType="com.example.demo.entity.purchase">
+        insert into purchase(itemid,purchasenum,price,state) values (#{itemid},#{num},#{price},#{state})
+    </insert>
+    <update id="updatePurchaseState" parameterType="com.example.demo.entity.purchase">
+        UPDATE purchase
+        SET
+        state = #{state}
+        WHERE purchaseid = #{purchaseid}
+    </update>
+    <update id="updatePurchaseStateById">
+        UPDATE purchase
+        SET
+        state = #{state}
+        WHERE purchaseid = #{id}
+    </update>
+    <update id="updatePurchaseNum" parameterType="com.example.demo.entity.purchase">
+        UPDATE purchase
+        SET
+        purchasenum = #{num}
+        WHERE purchaseid = #{purchaseid}
+    </update>
+</mapper>

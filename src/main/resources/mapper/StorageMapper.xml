@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.StorageMapper">
+
+    <select id="GetAllStorage" resultType="com.example.demo.entity.storage">
+        select * from storage;
+    </select>
+
+    <select id="GetStorageByItem" resultType="com.example.demo.entity.storage"
+            parameterType="com.example.demo.entity.item">
+        select * from storage where itemid = #{itemid}
+    </select>
+
+    <select id="GetStorageByItemId" resultType="com.example.demo.entity.storage">
+        select * from storage where itemid = #{id}
+    </select>
+
+    <select id="GetStorageById" resultType="com.example.demo.entity.storage">
+        select * from storage where storageid = #{id}
+    </select>
+
+    <insert id="addStorage"  parameterType="com.example.demo.entity.storage">
+        insert into storage(storagenum,itemid) values(#{num},#{itemid});
+    </insert>
+
+    <update id="updateStorage" parameterType="com.example.demo.entity.storage">
+        UPDATE storage
+        SET
+        storagenum = #{num}
+        WHERE itemid = #{itemid}
+        AND storageid = #{storageid}
+    </update>
+
+    <update id="updateStorageByItemId">
+        UPDATE storage
+        SET
+        storagenum = #{num}
+        WHERE itemid = #{id}
+    </update>
+    <update id="updateStorageByNumPlus">
+        UPDATE storage
+        SET
+        storagenum =storagenum+  #{num}
+        WHERE itemid = #{id}
+    </update>
+    <update id="updateStorageByNumDel">
+        UPDATE storage
+        SET
+        storagenum =storagenum -  #{num}
+        WHERE itemid = #{id}
+    </update>
+</mapper>

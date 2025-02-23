@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.StaffMapper">
+    <select id="GetAllStaff" resultType="com.example.demo.entity.staff">
+        select * from staff
+    </select>
+    <select id="GetStaffByType" resultType="com.example.demo.entity.staff">
+        select * from staff where  stafftype = #{type}
+    </select>
+    <select id="GetStaffById" resultType="com.example.demo.entity.staff">
+        select * from staff where staffid = #{id}
+    </select>
+    <select id="GetStaffByName" resultType="com.example.demo.entity.staff">
+        select * from staff where staffname = #{name}
+    </select>
+    <insert id="AddStaff" parameterType="com.example.demo.entity.staff">
+        insert into staff(staffname,stafftype) valuse(#{name},#{type})
+    </insert>
+
+</mapper>

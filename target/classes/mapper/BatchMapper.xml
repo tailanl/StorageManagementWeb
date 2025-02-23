@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.BatchMapper">
+
+    <select id="GetAllBatch" resultType="com.example.demo.entity.batch">
+        select * from batch;
+    </select>
+    <select id="GetBatchByType" resultType="com.example.demo.entity.batch">
+        select * from batch where type = #{type};
+    </select>
+    <select id="GetBatchByStaff" resultType="com.example.demo.entity.batch">
+        select * from batch where staffid = #{staffid};
+    </select>
+    <select id="GetBatchByStaffType" resultType="com.example.demo.entity.batch">
+        select * from batch where staffid = #{staffid} and type = #{type};
+    </select>
+    <select id="GetAllProductionBatch" resultType="com.example.demo.entity.batch">
+        select * from batch where type = 'production';
+    </select>
+    <select id="GetAllOrderBatch" resultType="com.example.demo.entity.batch">
+        select * from batch where type = 'order';
+    </select>
+    <select id="GetAllPurchaseBatch" resultType="com.example.demo.entity.batch">
+        select * from batch where type = 'purchase';
+    </select>
+    <select id="GetBatctByTimeRangeTpye" resultType="com.example.demo.entity.batch">
+        select * from batch where time &gt; #{early} and time &lt; #{later} and type = #{type};
+    </select>
+    <select id="GetBatctByTimeRange" resultType="com.example.demo.entity.batch">
+        select * from batch where time &gt; #{early} and time &lt; #{later};
+    </select>
+    <insert id="AddNewBatch" parameterType="com.example.demo.entity.batch">
+        insert into batch(id,type,staffid,time) values(#{id},#{type},#{staffid},#{time})
+    </insert>
+</mapper>
